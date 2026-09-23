@@ -21,7 +21,7 @@ build:
 	mkdir -p $@
 
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) $(ARGS)
 
 clean:
 	$(RM) $(TARGET) $(OBJECTS) $(DEPS)

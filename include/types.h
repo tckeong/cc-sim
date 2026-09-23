@@ -2,10 +2,10 @@
 #define TYPES_H
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
-#define fn  auto
-#define let auto
-
+typedef uint8_t  u8;
 typedef int32_t  i32;
 typedef uint32_t u32;
 

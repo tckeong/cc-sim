@@ -1,7 +1,38 @@
+#include "types.h"
 #include "simulator.hpp"
+#include "core.hpp"
 
-#include <iostream>
+#include <print>
+#include <filesystem>
+#include <format>
+#include <thread>
 
-using std::cout, std::endl;
+void Simulator::run() {
+    std::string input_file_name{config.input_file_name};
 
-void Simulator::run() { cout << "Simulator run!" << endl; }
+    for (u32 i = 0; i < cores.size(); i++) {
+        std::string input_file_path = format("{}_{}.data", input_file_name, i);
+
+        if (!std::filesystem::exists(input_file_path)) {
+            std::print("Input file: {} does not exist!\n", input_file_path);
+            return;
+        }
+
+        cores[i] =
+            Core(i, input_file_path, config.cache_size, config.associativity, config.block_size);
+    }
+
+    std::vector<std::thread> threads;
+
+    for (auto &core : cores) {
+        threads.emplace_back(run_core, std::ref(core));
+    }
+
+    std::print("Simulation start!\n");
+
+    for (auto &t : threads) {
+        t.join();
+    }
+
+    std::print("Simulation end!\n");
+}

@@ -11,14 +11,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    string cc_protocol(argv[1]);
-    string input_file(argv[2]);
-    string cache_size(argc > 3 ? argv[3] : "");
-    string associativity(argc > 4 ? argv[4] : "");
-    string block_size(argc > 5 ? argv[5] : "");
+    std::string cc_protocol(argv[1]);
+    std::string input_file(argv[2]);
+    std::string cache_size(argc > 3 ? argv[3] : "");
+    std::string associativity(argc > 4 ? argv[4] : "");
+    std::string block_size(argc > 5 ? argv[5] : "");
 
     Config    config(cc_protocol, input_file, cache_size, associativity, block_size);
-    Simulator simulator(config);
+    Simulator simulator(config, 1);
 
     simulator.run();
 
