@@ -2,7 +2,7 @@
 #define SIMULATOR_HPP
 
 #include "config.hpp"
-#include "types.h"
+#include "types.hpp"
 #include "core.hpp"
 #include "stats.hpp"
 

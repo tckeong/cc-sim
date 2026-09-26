@@ -1,7 +1,7 @@
 #ifndef CACHE_LINE_HPP
 #define CACHE_LINE_HPP
 
-#include "types.h"
+#include "types.hpp"
 
 #include <cmath>
 

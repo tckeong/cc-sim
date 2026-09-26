@@ -1,7 +1,7 @@
 #ifndef CORE_HPP
 #define CORE_HPP
 
-#include "types.h"
+#include "types.hpp"
 #include "cache.hpp"
 #include "stats.hpp"
 

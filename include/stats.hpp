@@ -1,7 +1,7 @@
 #ifndef STATS_HPP
 #define STATS_HPP
 
-#include "types.h"
+#include "types.hpp"
 
 class Stats {
 public:

@@ -1,8 +1,8 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include "types.h"
-#include "params.h"
+#include "types.hpp"
+#include "params.hpp"
 
 // Cache coherence protocol
 enum class CCProtocol { MESI, DRAGON };

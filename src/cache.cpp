@@ -1,5 +1,4 @@
 #include "cache.hpp"
-#include "types.h"
 
 bool Cache::access(CacheOperation operation, u32 address, u32 current_cycle) {
     u32 cache_line_idx = parse_cache_line_idx(address);
