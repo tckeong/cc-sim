@@ -18,19 +18,19 @@ enum class CCProtocol { MESI, DRAGON };
 class Config {
 public:
     CCProtocol  cc_protocol;
-    std::string input_file_name;
+    std::string input_file;
     u32         cache_size;
     u32         associativity;
     u32         block_size;
 
     Config()
-        : cc_protocol(CCProtocol::MESI), input_file_name(""), cache_size(DEFAULT_CACHE_SIZE),
+        : cc_protocol(CCProtocol::MESI), input_file(""), cache_size(DEFAULT_CACHE_SIZE),
           associativity(DEFAULT_ASSOCIATIVITY), block_size(DEFAULT_BLOCK_SIZE) {}
 
-    Config(std::string cc_protocol, std::string input_file_name, std::string cache_size,
+    Config(std::string cc_protocol, std::string input_file, std::string cache_size,
            std::string associativity, std::string block_size) {
-        this->cc_protocol     = parse_cc_protocol(cc_protocol);
-        this->input_file_name = input_file_name;
+        this->cc_protocol = parse_cc_protocol(cc_protocol);
+        this->input_file  = input_file;
 
         try {
             this->cache_size = stoi(cache_size);
@@ -41,7 +41,7 @@ public:
         try {
             this->associativity = stoi(associativity);
         } catch (...) {
-            this->cache_size = DEFAULT_ASSOCIATIVITY;
+            this->associativity = DEFAULT_ASSOCIATIVITY;
         }
 
         try {
