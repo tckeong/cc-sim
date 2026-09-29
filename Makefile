@@ -1,6 +1,6 @@
 CXX = c++
 CPPFLAGS += -Iinclude
-CXXFLAGS = -std=c++23 -Wall -Wextra -O2
+CXXFLAGS = -std=c++20 -Wall -Wextra -O2
 
 TARGET := build/cc-sim
 SOURCES := $(wildcard src/*.cpp)

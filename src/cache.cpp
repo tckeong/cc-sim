@@ -1,6 +1,6 @@
 #include "cache.hpp"
 
-bool Cache::access(CacheOperation operation, u32 address, u32 current_cycle) {
+CacheAccessResult Cache::access(CacheOperation operation, u32 address, u32 current_cycle) {
     u32 cache_line_idx = parse_cache_line_idx(address);
 
     switch (operation) {
@@ -12,7 +12,7 @@ bool Cache::access(CacheOperation operation, u32 address, u32 current_cycle) {
             break;
     }
 
-    return true;
+    return CacheAccessResult{.cache_hit = false, .bus_update = false};
 }
 
 u32 Cache::parse_cache_line_idx(u32 address) {

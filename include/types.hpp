@@ -11,4 +11,9 @@ typedef uint32_t u32;
 
 enum class CacheOperation { READ, WRITE };
 
+struct CacheAccessResult {
+    bool cache_hit;
+    bool bus_update;
+};
+
 #endif // TYPES_H

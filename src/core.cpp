@@ -1,13 +1,16 @@
 #include "core.hpp"
+#include "types.hpp"
 
 #include <fstream>
-#include <print>
+#include <iostream>
+#include <format>
 
 void Core::run(Stats &stats) {
     std::ifstream input_stream(input_file);
 
     if (!input_stream.is_open()) {
-        std::print("Input file: {} for core {} does not exist!\n", input_file, core_idx);
+        std::cout << std::format("Input file: {} for core {} does not exist!\n", input_file,
+                                 core_idx);
         return;
     }
 
@@ -17,16 +20,16 @@ void Core::run(Stats &stats) {
         auto operation      = parse_core_operation(label);
 
         bool cache_access = (operation == CoreOperation::LOAD || operation == CoreOperation::STORE);
-        bool cache_hit    = false;
+        CacheAccessResult cache_access_result{.cache_hit = false, .bus_update = false};
 
         switch (operation) {
             case CoreOperation::LOAD:
-                cache_hit = cache.access(CacheOperation::READ, value, current_cycle);
+                cache_access_result = cache.access(CacheOperation::READ, value, current_cycle);
                 stats.increase_load_store_cycle(1);
                 stats.increase_cache_access(1);
                 break;
             case CoreOperation::STORE:
-                cache_hit = cache.access(CacheOperation::WRITE, value, current_cycle);
+                cache_access_result = cache.access(CacheOperation::WRITE, value, current_cycle);
                 stats.increase_load_store_cycle(1);
                 stats.increase_cache_access(1);
                 break;
@@ -36,21 +39,26 @@ void Core::run(Stats &stats) {
                 break;
         }
 
-        if (cache_access && cache_hit) {
+        if (cache_access && cache_access_result.cache_hit) {
             increase_cycle(1);
-            stats.increase_idle_cycle(1);
             stats.increase_cache_hit(1);
-        } else if (cache_access && !cache_hit) {
+        } else if (cache_access && !cache_access_result.cache_hit) {
             increase_cycle(100);
             stats.increase_bus_traffic(block_size);
             stats.increase_idle_cycle(100);
             stats.increase_cache_miss(1);
+
+            if (cache_access_result.bus_update) {
+                increase_cycle(100);
+                stats.increase_bus_traffic(block_size);
+                stats.increase_idle_cycle(100);
+            }
         }
 
         increase_cycle(1);
     }
 
-    std::print("Core {} is running!\n", core_idx);
+    std::cout << std::format("Core {} is running!\n", core_idx);
 }
 
 /*

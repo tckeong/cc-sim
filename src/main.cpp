@@ -1,13 +1,15 @@
-#include <print>
+#include <iostream>
+#include <format>
 
 #include "config.hpp"
 #include "simulator.hpp"
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        std::print("Usage: {} <protocol> <input_file> <cache_size (Default: 4 KiB)> <associativity "
-                   "(Default: 2)> <block_size (Default: 32 bytes)>\n",
-                   argv[0]);
+        std::cout << std::format(
+            "Usage: {} <protocol> <input_file> <cache_size (Default: 4 KiB)> <associativity "
+            "(Default: 2)> <block_size (Default: 32 bytes)>\n",
+            argv[0]);
         return 1;
     }
 
