@@ -6,13 +6,16 @@
 void Stats::print() {
     u32 total_cycle = compute_cycle + load_store_cycle + idle_cycle;
 
-    std::cout << std::format("Core {} stats print!\n", core_idx);
-    std::cout << std::format(
-        "Total cycle: {}, compute cycle: {}, load/store cycle: {}, idle cycle: {}\n", total_cycle,
-        compute_cycle, load_store_cycle, idle_cycle);
-    std::cout << std::format("Cache access count: {}, cache hit count: {}, cache miss count: {}\n",
-                             cache_access_count, cache_hit_count, cache_miss_count);
-    std::cout << std::format("Bus data traffic: {}\n", bus_data_traffic);
+    std::cout << std::format("==================== Core {} ====================\n", core_idx);
+    std::cout << std::format("Total cycle: {}\n", total_cycle);
+    std::cout << std::format("Compute cycle: {}\n", compute_cycle);
+    std::cout << std::format("Load/Store cycle: {}\n", load_store_cycle);
+    std::cout << std::format("Idle cycle: {}\n", idle_cycle);
+    std::cout << std::format("Cache access count: {}\n", cache_access_count);
+    std::cout << std::format("Cache hit count: {}\n", cache_hit_count);
+    std::cout << std::format("Cache miss count: {}\n", cache_miss_count);
+    std::cout << std::format("Bus data traffic (bytes): {}\n", bus_data_traffic);
+    std::cout << std::format("=================================================\n", core_idx);
 }
 
 void Stats::increase_compute_cycle(u32 cycle) { this->compute_cycle += cycle; }
