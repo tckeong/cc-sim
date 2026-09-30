@@ -18,7 +18,7 @@ public:
         cache_line = std::vector(cache_count, CacheLine(cache_offset, associativity, block_size));
     };
 
-    CacheAccessResult access(CacheOperation operation, u32 address, u32 current_cycle);
+    CacheAccessResult access(CacheOperation operation, u32 address, u64 current_cycle);
 
 private:
     u32                    block_offset;

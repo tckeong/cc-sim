@@ -1,6 +1,6 @@
 #include "cache_line.hpp"
 
-CacheAccessResult CacheLine::cache_read(u32 address, u32 current_cycle) {
+CacheAccessResult CacheLine::cache_read(u32 address, u64 current_cycle) {
     u32 tag       = parse_tag(address);
     i32 hit_index = check_cache_hit(tag, current_cycle);
 
@@ -12,7 +12,7 @@ CacheAccessResult CacheLine::cache_read(u32 address, u32 current_cycle) {
     return CacheAccessResult{.cache_hit = false, .bus_update = bus_update};
 }
 
-CacheAccessResult CacheLine::cache_write(u32 address, u32 current_cycle) {
+CacheAccessResult CacheLine::cache_write(u32 address, u64 current_cycle) {
     u32 tag       = parse_tag(address);
     i32 hit_index = check_cache_hit(tag, current_cycle);
 
@@ -31,7 +31,7 @@ u32 CacheLine::parse_tag(u32 address) {
     return tag;
 }
 
-i32 CacheLine::check_cache_hit(u32 tag, u32 current_cycle) {
+i32 CacheLine::check_cache_hit(u32 tag, u64 current_cycle) {
     for (u32 i = 0; i < associativity; i++) {
         if (valid_bits[i] && tags[i] == tag) {
             last_visit[i] = current_cycle;
@@ -42,12 +42,12 @@ i32 CacheLine::check_cache_hit(u32 tag, u32 current_cycle) {
     return -1;
 }
 
-std::pair<u32, bool> CacheLine::resolve_cache_miss(u32 tag, u32 current_cycle) {
+std::pair<u32, bool> CacheLine::resolve_cache_miss(u32 tag, u64 current_cycle) {
     u32 lru_index = 0;
-    u32 lru_cycle = last_visit[0];
+    u64 lru_cycle = last_visit[0];
 
     for (u32 i = 1; i < associativity; i++) {
-        if (last_visit[i] < lru_cycle) {
+        if (last_visit[i] < lru_cycle || !valid_bits[i]) {
             lru_index = i;
             lru_cycle = last_visit[i];
         }

@@ -30,20 +30,20 @@ public:
 
 private:
     u32 core_idx;
-    u32 compute_cycle;
-    u32 load_store_cycle;
-    u32 idle_cycle;
+    u64 compute_cycle;
+    u64 load_store_cycle;
+    u64 idle_cycle;
 
-    u32 cache_access_count;
-    u32 cache_hit_count;
-    u32 cache_miss_count;
+    u64 cache_access_count;
+    u64 cache_hit_count;
+    u64 cache_miss_count;
 
-    u32 bus_data_traffic;
-    u32 bus_update_count;
-    u32 bus_invalidation_count;
+    u64 bus_data_traffic;
+    u64 bus_update_count;
+    u64 bus_invalidation_count;
 
-    u32 private_data_access_count;
-    u32 shared_data_access_count;
+    u64 private_data_access_count;
+    u64 shared_data_access_count;
 };
 
 #endif // STATS_HPP

@@ -18,7 +18,7 @@ public:
 
 private:
     u32         core_idx;
-    u32         current_cycle;
+    u64         current_cycle;
     u32         block_size;
     std::string input_file;
     Cache       cache;

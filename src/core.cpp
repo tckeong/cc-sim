@@ -43,6 +43,7 @@ void Core::run(Stats &stats) {
             increase_cycle(1);
             stats.increase_cache_hit(1);
         } else if (cache_access && !cache_access_result.cache_hit) {
+            increase_cycle(1);
             increase_cycle(100);
             stats.increase_bus_traffic(block_size);
             stats.increase_idle_cycle(100);
@@ -54,8 +55,6 @@ void Core::run(Stats &stats) {
                 stats.increase_idle_cycle(100);
             }
         }
-
-        increase_cycle(1);
     }
 
     std::cout << std::format("Core {} is running!\n", core_idx);

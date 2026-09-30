@@ -4,7 +4,7 @@
 #include <format>
 
 void Stats::print() {
-    u32 total_cycle = compute_cycle + load_store_cycle + idle_cycle;
+    u64 total_cycle = compute_cycle + load_store_cycle + idle_cycle;
 
     std::cout << std::format("==================== Core {} ====================\n", core_idx);
     std::cout << std::format("Total cycle: {}\n", total_cycle);
