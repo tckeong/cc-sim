@@ -51,6 +51,22 @@ public:
         }
     }
 
+    bool check() {
+        if (!is_pow_of_two(cache_size)) {
+            return false;
+        }
+
+        if (associativity % 2) {
+            return false;
+        }
+
+        if (!is_pow_of_two(block_size)) {
+            return false;
+        }
+
+        return true;
+    }
+
 private:
     CCProtocol parse_cc_protocol(std::string cc_protocol) {
         if (cc_protocol == "Dragon") {
@@ -59,6 +75,8 @@ private:
 
         return CCProtocol::MESI;
     }
+
+    bool is_pow_of_two(u32 n) { return (n > 0) && (n & (n - 1)) == 0; }
 };
 
 #endif // CONFIG_HPP
