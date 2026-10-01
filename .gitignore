@@ -1,6 +1,8 @@
 .cache/
 build/
 test_cases/
+.git-snapshots/
 
 .clang-format
 compile_commands.json
+requirements.md

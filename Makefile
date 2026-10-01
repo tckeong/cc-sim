@@ -2,7 +2,7 @@ CXX = c++
 CPPFLAGS += -Iinclude
 CXXFLAGS = -std=c++20 -Wall -Wextra -O2
 
-TARGET := build/cc-sim
+TARGET := build/CC-Simulate
 SOURCES := $(wildcard src/*.cpp)
 OBJECTS := $(patsubst src/%.cpp,build/%.o,$(SOURCES))
 DEPS := $(OBJECTS:.o=.d)
