@@ -20,6 +20,15 @@ private:
     std::vector<Core>  cores;
 
     static void run_core(Core &core, Stats &stats) { core.run(stats); }
+
+    void print_execution_cycle();
+    void print_compute_cycle();
+    void print_load_store_cycle();
+    void print_idle_cycle();
+    void print_cache_hit_miss_stats();
+    void print_bus_traffic_stats();
+    void print_bus_invalidation_update_stats();
+    void print_private_shared_data_access_stats();
 };
 
 #endif // SIMULATOR_HPP

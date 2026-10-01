@@ -28,16 +28,111 @@ void Simulator::run() {
         threads.emplace_back(run_core, std::ref(cores[i]), std::ref(stats[i]));
     }
 
-    std::cout << "Simulation start!\n";
-    ;
-
-    for (auto &t : threads) {
-        t.join();
+    for (auto &thread : threads) {
+        thread.join();
     }
 
-    for (auto &s : stats) {
-        s.print();
+    print_execution_cycle();
+    print_compute_cycle();
+    print_load_store_cycle();
+    print_idle_cycle();
+    print_cache_hit_miss_stats();
+    print_bus_traffic_stats();
+}
+
+void Simulator::print_execution_cycle() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_total_cycle();
     }
 
-    std::cout << "Simulation end!\n";
+    std::cout << std::endl;
+}
+
+void Simulator::print_compute_cycle() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_compute_cycle();
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulator::print_load_store_cycle() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_load_store_cycle();
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulator::print_idle_cycle() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_idle_cycle();
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulator::print_cache_hit_miss_stats() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_cache_hit_count() << ":" << stats[i].get_cache_miss_count();
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulator::print_bus_traffic_stats() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_bus_data_traffic();
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulator::print_bus_invalidation_update_stats() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_bus_invalidation_count() + stats[i].get_bus_update_count();
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulator::print_private_shared_data_access_stats() {
+    for (u32 i = 0; i < stats.size(); i++) {
+        if (i > 0) {
+            std::cout << " ";
+        }
+
+        std::cout << stats[i].get_private_data_access_count() << ":"
+                  << stats[i].get_shared_data_access_count();
+    }
+
+    std::cout << std::endl;
 }

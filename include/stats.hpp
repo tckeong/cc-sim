@@ -28,6 +28,18 @@ public:
     void increase_private_data_access(u32 count);
     void increase_shared_data_access(u32 count);
 
+    u64 get_total_cycle();
+    u64 get_compute_cycle();
+    u64 get_load_store_cycle();
+    u64 get_idle_cycle();
+    u64 get_cache_hit_count();
+    u64 get_cache_miss_count();
+    u64 get_bus_data_traffic();
+    u64 get_bus_update_count();
+    u64 get_bus_invalidation_count();
+    u64 get_private_data_access_count();
+    u64 get_shared_data_access_count();
+
 private:
     u32 core_idx;
     u64 compute_cycle;

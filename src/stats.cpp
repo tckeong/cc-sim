@@ -32,3 +32,15 @@ void Stats::increase_bus_invalidation(u32 count) { this->bus_invalidation_count 
 
 void Stats::increase_private_data_access(u32 count) { this->private_data_access_count += count; }
 void Stats::increase_shared_data_access(u32 count) { this->shared_data_access_count += count; }
+
+u64 Stats::get_total_cycle() { return compute_cycle + load_store_cycle + idle_cycle; }
+u64 Stats::get_compute_cycle() { return compute_cycle; }
+u64 Stats::get_load_store_cycle() { return load_store_cycle; }
+u64 Stats::get_idle_cycle() { return idle_cycle; }
+u64 Stats::get_cache_hit_count() { return cache_hit_count; }
+u64 Stats::get_cache_miss_count() { return cache_miss_count; }
+u64 Stats::get_bus_data_traffic() { return bus_data_traffic; }
+u64 Stats::get_bus_update_count() { return bus_update_count; }
+u64 Stats::get_bus_invalidation_count() { return bus_invalidation_count; }
+u64 Stats::get_private_data_access_count() { return private_data_access_count; }
+u64 Stats::get_shared_data_access_count() { return shared_data_access_count; }

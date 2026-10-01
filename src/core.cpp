@@ -56,8 +56,6 @@ void Core::run(Stats &stats) {
             }
         }
     }
-
-    std::cout << std::format("Core {} is running!\n", core_idx);
 }
 
 /*
