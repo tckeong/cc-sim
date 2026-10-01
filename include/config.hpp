@@ -52,15 +52,23 @@ public:
     }
 
     bool check() {
+        // cache_size need to be power of two
         if (!is_pow_of_two(cache_size)) {
             return false;
         }
 
-        if (associativity % 2) {
+        // associativity need >= 1
+        if (associativity < 1) {
             return false;
         }
 
-        if (!is_pow_of_two(block_size)) {
+        // block_size need >= 4 and be power of two
+        if (block_size < 4 || !is_pow_of_two(block_size)) {
+            return false;
+        }
+
+        if (cache_size < associativity * block_size ||
+            cache_size % (associativity * block_size) != 0) {
             return false;
         }
 

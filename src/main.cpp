@@ -22,9 +22,11 @@ int main(int argc, char *argv[]) {
     Config config(cc_protocol, input_file, cache_size, associativity, block_size);
 
     if (!config.check()) {
-        std::cout << "Invalid cache_size / associativity / block_size! cache_size and block_size "
-                     "need to be power of 2. associativity need to be even number."
-                  << std::endl;
+        std::cout
+            << "Invalid cache_size / associativity / block_size! cache_size and block_size "
+               "need to be power of 2. cache_size need to as large as associativity * block_size."
+            << std::endl;
+        return 1;
     }
 
     Simulator simulator(config, 1);
