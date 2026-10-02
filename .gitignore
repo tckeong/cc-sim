@@ -2,6 +2,7 @@
 build/
 test_cases/
 .git-snapshots/
+test/
 
 .clang-format
 compile_commands.json
