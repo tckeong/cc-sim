@@ -18,4 +18,10 @@ struct CacheAccessResult {
     bool bus_update;
 };
 
+enum ProcessorSignal { PROCESSOR_READ, PROCESSOR_WRITE };
+
+enum BusSignal { BUS_READ, BUS_READ_EXCLUSIVE, BUS_READX, NONE };
+
+enum MesiState { M, E, S, I };
+
 #endif // TYPES_H
