@@ -2,8 +2,11 @@
 #define CACHE_LINE_HPP
 
 #include "types.hpp"
+#include "mesi.hpp"
+#include "cache_coherence_model.hpp"
 
 #include <cmath>
+#include <memory>
 
 class CacheLine {
 public:
@@ -11,8 +14,12 @@ public:
     CacheLine(u32 cache_offset, u32 associativity, u32 block_size)
         : cache_offset(cache_offset), associativity(associativity), block_size(block_size),
           valid_bits(associativity, false), dirty_bits(associativity, false),
-          tags(associativity, 0), last_visit(associativity, 0) {
+          tags(associativity, 0), last_visit(associativity, 0),
+          cache_coherence_states(associativity) {
         block_offset = std::log2(block_size);
+        for (u32 i = 0; i < associativity; i++) {
+            cache_coherence_states[i] = std::make_unique<MESI>();
+        }
     };
 
     CacheAccessResult cache_read(u32 address, u64 current_cycle);
@@ -24,11 +31,11 @@ private:
     u32 block_size;
     u32 block_offset;
 
-    std::vector<bool> valid_bits;
-    std::vector<bool> dirty_bits;
-    std::vector<u32>  tags;
-    std::vector<u64>  last_visit;
-    MesiState state;
+    std::vector<bool>                                 valid_bits;
+    std::vector<bool>                                 dirty_bits;
+    std::vector<u32>                                  tags;
+    std::vector<u64>                                  last_visit;
+    std::vector<std::unique_ptr<CacheCoherenceModel>> cache_coherence_states;
 
     u32                  parse_tag(u32 address);
     i32                  check_cache_hit(u32 tag, u64 current_cycle);

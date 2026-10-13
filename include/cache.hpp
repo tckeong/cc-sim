@@ -11,11 +11,13 @@ public:
     Cache() = default;
 
     Cache(u32 cache_size, u32 associativity, u32 block_size)
-        : cache_count((cache_size / block_size) / associativity) {
+        : cache_count((cache_size / block_size) / associativity), cache_line(cache_count) {
         block_offset = std::log2(block_size);
         cache_offset = std::log2(cache_count);
 
-        cache_line = std::vector(cache_count, CacheLine(cache_offset, associativity, block_size));
+        for (u32 i = 0; i < cache_count; i++) {
+            cache_line[i] = CacheLine(cache_offset, associativity, block_size);
+        }
     };
 
     CacheAccessResult access(CacheOperation operation, u32 address, u64 current_cycle);

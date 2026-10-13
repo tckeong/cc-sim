@@ -16,6 +16,8 @@ enum class CacheOperation { READ, WRITE };
 struct CacheAccessResult {
     bool cache_hit;
     bool bus_update;
+
+    CacheAccessResult(bool hit, bool update) : cache_hit(hit), bus_update(update) {}
 };
 
 enum ProcessorSignal { PROCESSOR_READ, PROCESSOR_WRITE };
