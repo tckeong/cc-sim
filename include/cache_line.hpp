@@ -15,10 +15,10 @@ public:
         : cache_offset(cache_offset), associativity(associativity), block_size(block_size),
           valid_bits(associativity, false), dirty_bits(associativity, false),
           tags(associativity, 0), last_visit(associativity, 0),
-          cache_coherence_states(std::vector<CacheCoherenceModel *>()) {
+          cache_coherence_states(associativity) {
         block_offset = std::log2(block_size);
         for (u32 i = 0; i < associativity; i++) {
-            cache_coherence_states[i] = new MESI();
+            cache_coherence_states[i] = std::make_unique<MESI>();
         }
     };
 
@@ -31,11 +31,11 @@ private:
     u32 block_size;
     u32 block_offset;
 
-    std::vector<bool>                  valid_bits;
-    std::vector<bool>                  dirty_bits;
-    std::vector<u32>                   tags;
-    std::vector<u64>                   last_visit;
-    std::vector<CacheCoherenceModel *> cache_coherence_states;
+    std::vector<bool>                                 valid_bits;
+    std::vector<bool>                                 dirty_bits;
+    std::vector<u32>                                  tags;
+    std::vector<u64>                                  last_visit;
+    std::vector<std::unique_ptr<CacheCoherenceModel>> cache_coherence_states;
 
     u32                  parse_tag(u32 address);
     i32                  check_cache_hit(u32 tag, u64 current_cycle);

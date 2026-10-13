@@ -18,8 +18,6 @@ public:
     virtual void cache_read() override;
     virtual void cache_write() override;
 
-    virtual ~MESI() override = default;
-
 private:
     State     state;
     Directory directory;
