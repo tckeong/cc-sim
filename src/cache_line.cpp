@@ -5,11 +5,11 @@ CacheAccessResult CacheLine::cache_read(u32 address, u64 current_cycle) {
     i32 hit_index = check_cache_hit(tag, current_cycle);
 
     if (hit_index >= 0) {
-        return CacheAccessResult{.cache_hit = true, .bus_update = false};
+        return CacheAccessResult(true, false);
     }
 
     auto [lru_index, bus_update] = resolve_cache_miss(tag, current_cycle);
-    return CacheAccessResult{.cache_hit = false, .bus_update = bus_update};
+    return CacheAccessResult(false, bus_update);
 }
 
 CacheAccessResult CacheLine::cache_write(u32 address, u64 current_cycle) {
@@ -18,12 +18,12 @@ CacheAccessResult CacheLine::cache_write(u32 address, u64 current_cycle) {
 
     if (hit_index >= 0) {
         dirty_bits[hit_index] = true;
-        return CacheAccessResult{.cache_hit = true, .bus_update = false};
+        return CacheAccessResult(true, false);
     }
 
     auto [lru_index, bus_update] = resolve_cache_miss(tag, current_cycle);
     dirty_bits[lru_index]        = true;
-    return CacheAccessResult{.cache_hit = false, .bus_update = bus_update};
+    return CacheAccessResult(false, bus_update);
 }
 
 u32 CacheLine::parse_tag(u32 address) {

@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    Simulator simulator(config, 1);
+    Simulator simulator(config, 4);
 
     simulator.run();
 

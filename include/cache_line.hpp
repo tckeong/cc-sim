@@ -2,6 +2,7 @@
 #define CACHE_LINE_HPP
 
 #include "types.hpp"
+#include "mesi.hpp"
 
 #include <cmath>
 
@@ -28,6 +29,7 @@ private:
     std::vector<bool> dirty_bits;
     std::vector<u32>  tags;
     std::vector<u64>  last_visit;
+    std::vector<MESI> mesi_states;
 
     u32                  parse_tag(u32 address);
     i32                  check_cache_hit(u32 tag, u64 current_cycle);
