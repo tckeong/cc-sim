@@ -26,6 +26,7 @@ private:
     u32                    block_offset;
     u32                    cache_offset;
     u32                    cache_count;
+    u32                    core_idx;
     std::vector<CacheLine> cache_line;
 
     u32 parse_cache_line_idx(u32 address);

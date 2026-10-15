@@ -4,7 +4,7 @@
 class CacheCoherenceModel {
 public:
     virtual void change_state() = 0;
-    virtual void get_state()    = 0;
+    virtual State get_state()   = 0;
     virtual void set_state()    = 0;
     virtual void cache_read()   = 0;
     virtual void cache_write()  = 0;
