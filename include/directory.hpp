@@ -4,13 +4,26 @@
 #include "types.hpp"
 
 #include <unordered_map>
+#include "core.hpp"
+
+enum class CacheState
+{
+    Uncached,
+    Exclusive,
+    Shared
+};
 
 class Directory {
-private:
-    enum class State { Uncached, Exclusive, Shared };
+public:
+    void handleWriteMiss(Core core, u32 memoryAddress);
+    void handleReadMiss(Core core, u32 memoryAddress);
+    void handleWriteBack(Core core, u32 memoryAddress);
+    CacheState checkIsExclusive(u32 memoryAddress);
 
-    std::unordered_map<u32, State>            state;
-    std::unordered_map<u32, std::vector<u32>> sharer;
+private:
+    // memory address -> address cache state
+    std::unordered_map<u32, CacheState>             cacheState;
+    std::unordered_map<u32, std::vector<u32>>       sharer;
 };
 
 #endif // DIRECTORY_HPP

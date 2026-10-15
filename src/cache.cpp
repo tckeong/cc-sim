@@ -12,7 +12,7 @@ CacheAccessResult Cache::access(CacheOperation operation, u32 address, u64 curre
             break;
     }
 
-    return CacheAccessResult{.cache_hit = false, .bus_update = false};
+    return CacheAccessResult{false, false};
 }
 
 u32 Cache::parse_cache_line_idx(u32 address) {

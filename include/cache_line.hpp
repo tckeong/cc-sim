@@ -35,7 +35,8 @@ private:
     std::vector<bool>                                 dirty_bits;
     std::vector<u32>                                  tags;
     std::vector<u64>                                  last_visit;
-    std::vector<std::unique_ptr<CacheCoherenceModel>> cache_coherence_states;
+    // Each cache line has a unique MESI state for each way in the set
+    std::vector<std::unique_ptr<MESI>> cache_coherence_states;
 
     u32                  parse_tag(u32 address);
     i32                  check_cache_hit(u32 tag, u64 current_cycle);

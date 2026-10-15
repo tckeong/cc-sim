@@ -20,7 +20,7 @@ void Core::run(Stats &stats) {
         auto operation      = parse_core_operation(label);
 
         bool cache_access = (operation == CoreOperation::LOAD || operation == CoreOperation::STORE);
-        CacheAccessResult cache_access_result{.cache_hit = false, .bus_update = false};
+        CacheAccessResult cache_access_result(false, false);
 
         switch (operation) {
             case CoreOperation::LOAD:

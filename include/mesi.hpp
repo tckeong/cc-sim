@@ -14,9 +14,13 @@ public:
     virtual void change_state() override;
     virtual void get_state() override;
     virtual void set_state() override;
-    virtual void invalidate() override;
     virtual void cache_read() override;
     virtual void cache_write() override;
+
+    // Additional methods for MESI protocol
+    void fetch();
+    void fetchAndInvalidate();
+    void invalidate();
 
 private:
     State     state;
