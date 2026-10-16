@@ -12,7 +12,6 @@ CacheAccessResult CacheLine::cache_read(u32 address, u64 current_cycle)
     {
         // cache coherence state will transition based on the MESI protocol
         // if found cache, MESI state should be M, E, S, and read will not change states and increase signal
-        // cache_coherence_states[hit_index]->cache_read();
         return CacheAccessResult(true, false);
     }
 
