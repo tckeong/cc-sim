@@ -31,7 +31,6 @@ public:
 
 private:
     State state;
-    Directory directory;
 };
 
 #endif // MESI_HPP
