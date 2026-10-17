@@ -6,7 +6,12 @@
 void Directory::handleWriteMiss(u32 core_idx, u32 memoryAddress, MESI &mesi_state)
 {
     // Write miss from the core_idx adds 1 traffic to the bus
-    stats.increase_bus_traffic(1);
+    stats[core_idx].increase_bus_traffic(1);
+
+    if (cacheState.find(memoryAddress) == cacheState.end())
+    {
+        cacheState[memoryAddress] = CacheState::Uncached;
+    }
 
     CacheState currentState = cacheState[memoryAddress];
 
@@ -24,12 +29,13 @@ void Directory::handleWriteMiss(u32 core_idx, u32 memoryAddress, MESI &mesi_stat
         {
             // every single sharer needs to invalidate their cache line, so we need to call fetch_and_invalidate for each sharer
             mesi_state.fetch_and_invalidate();
-            stats.increase_bus_traffic(1);
-            stats.increase_bus_invalidation(1);
+            stats[core_idx].increase_bus_traffic(1);
+            stats[core_idx].increase_bus_invalidation(1);
         }
 
         sharer[memoryAddress].clear();
         sharer[memoryAddress].push_back(core_idx);
+        stats[core_idx].increase_private_data_access(1);
         break;
 
     case CacheState::Shared:
@@ -39,11 +45,13 @@ void Directory::handleWriteMiss(u32 core_idx, u32 memoryAddress, MESI &mesi_stat
         {
             // every single sharer needs to invalidate their cache line, so we need to call fetch_and_invalidate for each sharer
             mesi_state.fetch_and_invalidate();
-            stats.increase_bus_invalidation(1);
+            stats[core_idx].increase_bus_traffic(1);
+            stats[core_idx].increase_bus_invalidation(1);
         }
 
         sharer[memoryAddress].clear();
         sharer[memoryAddress].push_back(core_idx);
+        stats[core_idx].increase_shared_data_access(1);
         break;
     }
 }
@@ -51,7 +59,12 @@ void Directory::handleWriteMiss(u32 core_idx, u32 memoryAddress, MESI &mesi_stat
 void Directory::handleReadMiss(u32 core_idx, u32 memoryAddress, MESI &mesi_state)
 {
     // Read miss from the core_idx adds 1 traffic to the bus
-    stats.increase_bus_traffic(1);
+    stats[core_idx].increase_bus_traffic(1);
+
+    if (cacheState.find(memoryAddress) == cacheState.end())
+    {
+        cacheState[memoryAddress] = CacheState::Uncached;
+    }
 
     CacheState currentState = cacheState[memoryAddress];
 
@@ -71,14 +84,16 @@ void Directory::handleReadMiss(u32 core_idx, u32 memoryAddress, MESI &mesi_state
         for (u32 sharer_core : sharer[memoryAddress])
         {
             mesi_state.fetch();
-            stats.increase_bus_traffic(1);
+            stats[core_idx].increase_bus_traffic(1);
         }
 
         sharer[memoryAddress].push_back(core_idx);
+        stats[core_idx].increase_private_data_access(1);
         break;
 
     case CacheState::Shared:
         sharer[memoryAddress].push_back(core_idx);
+        stats[core_idx].increase_shared_data_access(1);
         break;
     }
 }
@@ -86,7 +101,7 @@ void Directory::handleReadMiss(u32 core_idx, u32 memoryAddress, MESI &mesi_state
 void Directory::handleWriteBack(u32 core_idx, u32 memoryAddress, MESI &mesi_state)
 {
     // Write back from the core_idx adds 1 traffic to the bus
-    stats.increase_bus_traffic(1);
+    stats[core_idx].increase_bus_traffic(1);
 
     CacheState currentState = cacheState[memoryAddress];
 
@@ -112,5 +127,10 @@ void Directory::handleWriteBack(u32 core_idx, u32 memoryAddress, MESI &mesi_stat
 
 bool Directory::checkIsExclusive(u32 memoryAddress)
 {
+    if (cacheState.find(memoryAddress) == cacheState.end())
+    {
+        return false;
+    }
+
     return cacheState[memoryAddress] == CacheState::Exclusive && sharer[memoryAddress].size() == 1;
 }

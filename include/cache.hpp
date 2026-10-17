@@ -10,13 +10,15 @@ class Cache {
 public:
     Cache() = default;
 
-    Cache(u32 cache_size, u32 associativity, u32 block_size)
-        : cache_count((cache_size / block_size) / associativity), cache_line(cache_count) {
+    Cache(u32 cache_size, u32 associativity, u32 block_size, Directory &directory, u32 core_idx)
+        : cache_count((cache_size / block_size) / associativity), core_idx(core_idx),
+          cache_line() {
         block_offset = std::log2(block_size);
         cache_offset = std::log2(cache_count);
+        cache_line.reserve(cache_count);
 
         for (u32 i = 0; i < cache_count; i++) {
-            cache_line[i] = CacheLine(cache_offset, associativity, block_size);
+            cache_line.emplace_back(cache_offset, associativity, block_size, directory, core_idx);
         }
     };
 

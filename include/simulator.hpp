@@ -8,9 +8,9 @@
 
 class Simulator {
 public:
-    Simulator() {}
+    // Simulator() {}
     Simulator(Config config, u32 num_of_cores)
-        : config(config), stats(num_of_cores), cores(num_of_cores) {}
+        : config(config), stats(num_of_cores), cores(), directory(stats) {}
 
     void run();
 
@@ -18,6 +18,7 @@ private:
     Config             config;
     std::vector<Stats> stats;
     std::vector<Core>  cores;
+    Directory          directory;
 
     static void run_core(Core &core, Stats &stats) { core.run(stats); }
 

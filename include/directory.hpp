@@ -2,9 +2,11 @@
 #define DIRECTORY_HPP
 
 #include "types.hpp"
+#include "stats.hpp"
 
 #include <unordered_map>
-#include "core.hpp"
+
+class MESI;
 
 enum class CacheState
 {
@@ -13,9 +15,11 @@ enum class CacheState
     Shared
 };
 
+// TODO: might need to set up a global directory in simulator.cpp and pass it to each core, so that each core can access the same directory
+
 class Directory {
 public:
-    Directory(Stats &stats) : stats(stats) {
+    Directory(std::vector<Stats> &stats) : stats(stats) {
         this->cacheState = std::unordered_map<u32, CacheState>();
         this->sharer = std::unordered_map<u32, std::vector<u32>>();
     }
@@ -29,7 +33,7 @@ private:
     // memory address -> address cache state
     std::unordered_map<u32, CacheState>             cacheState;
     std::unordered_map<u32, std::vector<u32>>       sharer;
-    Stats                                           &stats;
+    std::vector<Stats>                              &stats;
 };
 
 #endif // DIRECTORY_HPP

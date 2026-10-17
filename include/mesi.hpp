@@ -2,7 +2,6 @@
 #define MESI_HPP
 
 #include "directory.hpp"
-#include "cache_coherence_model.hpp"
 
 enum class State
 {
@@ -12,22 +11,18 @@ enum class State
     INVALID
 };
 
-class MESI : public CacheCoherenceModel
+class MESI
 {
 public:
     MESI() : state(State::INVALID) {}
 
-    virtual void change_state() override;
-    virtual State get_state() override;
-    virtual void cache_read() override;
-    virtual void cache_write() override;
-
     // Additional methods for MESI protocol
+    State get_state() const { return state; }
     bool is_valid() const { return state != State::INVALID; }
     void fetch();
     void fetch_and_invalidate();
     void invalidate();
-    void update_state(u32 memory_address, CacheOperation operation, u32 core_idx);
+    void update_state(Directory &directory, u32 memory_address, CacheOperation operation, u32 core_idx);
 
 private:
     State state;

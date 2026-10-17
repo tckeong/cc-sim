@@ -9,7 +9,9 @@
 void Simulator::run() {
     std::string input_file{config.input_file};
 
-    for (u32 i = 0; i < cores.size(); i++) {
+    cores.reserve(stats.size());
+
+    for (u32 i = 0; i < stats.size(); i++) {
         std::string input_file_path = std::format("{}_{}.data", input_file, i);
 
         if (!std::filesystem::exists(input_file_path)) {
@@ -18,8 +20,8 @@ void Simulator::run() {
         }
 
         stats[i] = Stats(i);
-        cores[i] =
-            Core(i, input_file_path, config.cache_size, config.associativity, config.block_size);
+        cores.emplace_back(
+            i, input_file_path, config.cache_size, config.associativity, config.block_size, directory);
     }
 
     std::vector<std::thread> threads;
@@ -38,6 +40,8 @@ void Simulator::run() {
     print_idle_cycle();
     print_cache_hit_miss_stats();
     print_bus_traffic_stats();
+    print_bus_invalidation_update_stats();
+    print_private_shared_data_access_stats();
 }
 
 void Simulator::print_execution_cycle() {

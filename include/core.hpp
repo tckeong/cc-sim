@@ -4,15 +4,16 @@
 #include "types.hpp"
 #include "cache.hpp"
 #include "stats.hpp"
+#include "directory.hpp"
 
 enum class CoreOperation { LOAD, STORE, OTHER };
 
 class Core {
 public:
     Core() = default;
-    Core(u32 core_idx, std::string input_file, u32 cache_size, u32 associativity, u32 block_size)
+    Core(u32 core_idx, std::string input_file, u32 cache_size, u32 associativity, u32 block_size, Directory &directory)
         : core_idx(core_idx), current_cycle(0), block_size(block_size), input_file(input_file),
-          cache(Cache(cache_size, associativity, block_size)) {};
+          cache(Cache(cache_size, associativity, block_size, directory, core_idx)) {};
 
     void run(Stats &stats);
 

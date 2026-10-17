@@ -9,8 +9,7 @@ void Core::run(Stats &stats) {
     std::ifstream input_stream(input_file);
 
     if (!input_stream.is_open()) {
-        std::cout << std::format("Input file: {} for core {} does not exist!\n", input_file,
-                                 core_idx);
+        std::cout << std::format("Input file: {} for core {} does not exist!\n", input_file, core_idx);
         return;
     }
 

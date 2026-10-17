@@ -16,7 +16,7 @@ CacheAccessResult CacheLine::cache_read(u32 address, u64 current_cycle)
     }
 
     // If not found, the MESI state should be I, and read will change the state
-    auto [lru_index, bus_update] = resolve_cache_miss(address, current_cycle, CacheOperation::READ, core_idx);
+    auto [lru_index, bus_update] = resolve_cache_miss(address, current_cycle, CacheOperation::READ);
     return CacheAccessResult(false, bus_update);
 }
 
@@ -28,12 +28,12 @@ CacheAccessResult CacheLine::cache_write(u32 address, u64 current_cycle)
     if (hit_index >= 0)
     {
         // cache coherence state will transition based on the MESI protocol
-        cache_coherence_states[hit_index]->update_state(address, CacheOperation::WRITE, core_idx);
+        cache_coherence_states[hit_index]->update_state(directory, address, CacheOperation::WRITE, core_idx);
         // dirty_bits[hit_index] = true;
         return CacheAccessResult(true, false);
     }
 
-    auto [lru_index, bus_update] = resolve_cache_miss(address, current_cycle, CacheOperation::WRITE, core_idx);
+    auto [lru_index, bus_update] = resolve_cache_miss(address, current_cycle, CacheOperation::WRITE);
     // dirty_bits[lru_index] = true;
     return CacheAccessResult(false, bus_update);
 }
@@ -62,7 +62,7 @@ i32 CacheLine::check_cache_hit(u32 tag, u64 current_cycle)
     return -1;
 }
 
-std::pair<u32, bool> CacheLine::resolve_cache_miss(u32 memory_address, u64 current_cycle, CacheOperation operation, u32 core_idx)
+std::pair<u32, bool> CacheLine::resolve_cache_miss(u32 memory_address, u64 current_cycle, CacheOperation operation)
 {
     u32 lru_index = 0;
     u64 lru_cycle = last_visit[0];
@@ -96,7 +96,7 @@ std::pair<u32, bool> CacheLine::resolve_cache_miss(u32 memory_address, u64 curre
     bool bus_update = cache_coherence_states[lru_index]->get_state() == State::MODIFIED;
 
     // TODO: update the cache MESI state later based on the MESI protocol
-    cache_coherence_states[lru_index]->update_state(memory_address, operation, core_idx);
+    cache_coherence_states[lru_index]->update_state(directory, memory_address, operation, core_idx);
     // valid_bits[lru_index] = true;
     // dirty_bits[lru_index] = false;
 
