@@ -3,6 +3,7 @@ build/
 test_cases/
 .git-snapshots/
 test/
+docs/
 
 .clang-format
 compile_commands.json
