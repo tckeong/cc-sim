@@ -3,14 +3,12 @@
 
 #include "types.hpp"
 
-class Stats {
+class Stats
+{
 public:
     Stats() = default;
     Stats(u32 core_idx)
-        : core_idx(core_idx), compute_cycle(0), load_store_cycle(0), idle_cycle(0),
-          cache_access_count(0), cache_hit_count(0), cache_miss_count(0), bus_data_traffic(0),
-          bus_update_count(0), bus_invalidation_count(0), private_data_access_count(0),
-          shared_data_access_count(0) {}
+        : core_idx(core_idx) {};
 
     void print();
     void increase_compute_cycle(u32 cycle);
@@ -28,6 +26,10 @@ public:
     void increase_private_data_access(u32 count);
     void increase_shared_data_access(u32 count);
 
+    void cache_hit_activity();
+    void cache_miss_activity(u32 block_size);
+    void bus_update_activity(u32 block_size);
+
     u64 get_total_cycle();
     u64 get_compute_cycle();
     u64 get_load_store_cycle();
@@ -42,20 +44,20 @@ public:
 
 private:
     u32 core_idx;
-    u64 compute_cycle;
-    u64 load_store_cycle;
-    u64 idle_cycle;
+    u64 compute_cycle    = 0;
+    u64 load_store_cycle = 0;
+    u64 idle_cycle       = 0;
 
-    u64 cache_access_count;
-    u64 cache_hit_count;
-    u64 cache_miss_count;
+    u64 cache_access_count = 0;
+    u64 cache_hit_count    = 0;
+    u64 cache_miss_count   = 0;
 
-    u64 bus_data_traffic;
-    u64 bus_update_count;
-    u64 bus_invalidation_count;
+    u64 bus_data_traffic       = 0;
+    u64 bus_update_count       = 0;
+    u64 bus_invalidation_count = 0;
 
-    u64 private_data_access_count;
-    u64 shared_data_access_count;
+    u64 private_data_access_count = 0;
+    u64 shared_data_access_count  = 0;
 };
 
 #endif // STATS_HPP

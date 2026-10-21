@@ -1,9 +1,11 @@
 #include "stats.hpp"
+#include "params.hpp"
 
 #include <iostream>
 #include <format>
 
-void Stats::print() {
+void Stats::print()
+{
     u64 total_cycle = compute_cycle + load_store_cycle + idle_cycle;
 
     std::cout << std::format("==================== Core {} ====================\n", core_idx);
@@ -32,6 +34,28 @@ void Stats::increase_bus_invalidation(u32 count) { this->bus_invalidation_count 
 
 void Stats::increase_private_data_access(u32 count) { this->private_data_access_count += count; }
 void Stats::increase_shared_data_access(u32 count) { this->shared_data_access_count += count; }
+
+void Stats::cache_hit_activity()
+{
+    this->load_store_cycle++;
+    this->cache_access_count++;
+    this->cache_hit_count++;
+}
+
+void Stats::cache_miss_activity(u32 block_size)
+{
+    this->load_store_cycle++;
+    this->cache_access_count++;
+    this->cache_miss_count++;
+    this->bus_data_traffic += block_size;
+}
+
+void Stats::bus_update_activity(u32 block_size)
+{
+    this->idle_cycle += CACHE_MISS_PENALTY;
+    this->bus_data_traffic += block_size;
+    this->bus_update_count++;
+}
 
 u64 Stats::get_total_cycle() { return compute_cycle + load_store_cycle + idle_cycle; }
 u64 Stats::get_compute_cycle() { return compute_cycle; }
