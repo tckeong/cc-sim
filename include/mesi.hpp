@@ -1,31 +1,32 @@
 #ifndef MESI_HPP
 #define MESI_HPP
 
-#include "directory.hpp"
-
-enum class State
-{
-    MODIFIED,
-    EXCLUSIVE,
-    SHARED,
-    INVALID
-};
+#include "types.hpp"
 
 class MESI
 {
 public:
-    MESI() : state(State::INVALID) {}
+    MESI()
+        : state(MesiState::INVALID) {};
+
+    MESI(MesiState initial_state)
+        : state(initial_state) {};
 
     // Additional methods for MESI protocol
-    State get_state() const { return state; }
-    bool is_valid() const { return state != State::INVALID; }
-    void fetch();
-    void fetch_and_invalidate();
-    void invalidate();
-    void update_state(Directory &directory, u32 memory_address, CacheOperation operation, u32 core_idx);
+    MesiState get_state() const { return state; }
+
+    bool is_read_valid() const { return state != MesiState::INVALID; }
+    bool is_write_valid() const
+    {
+        return state == MesiState::MODIFIED || state == MesiState::EXCLUSIVE;
+    }
+    bool is_valid() const { return state != MesiState::INVALID; }
+
+    void invalidate() { state = MesiState::INVALID; }
+    void set_state(MesiState new_state) { state = new_state; }
 
 private:
-    State state;
+    MesiState state;
 };
 
 #endif // MESI_HPP
