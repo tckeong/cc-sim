@@ -4,7 +4,8 @@
 #include "config.hpp"
 #include "simulator.hpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     if (argc < 3) {
         std::cout << std::format(
             "Usage: {} <protocol> <input_file> <cache_size (Default: 4096 bytes)> <associativity "
@@ -21,11 +22,9 @@ int main(int argc, char *argv[]) {
 
     Config config(cc_protocol, input_file, cache_size, associativity, block_size);
 
-    if (!config.check()) {
-        std::cout
-            << "Invalid cache_size / associativity / block_size! cache_size and block_size "
-               "need to be power of 2. cache_size need to as large as associativity * block_size."
-            << std::endl;
+    auto error_message = config.check();
+    if (error_message) {
+        std::cout << *error_message << std::endl;
         return 1;
     }
 
