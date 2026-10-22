@@ -10,9 +10,7 @@ void Simulator::run()
 {
     std::string input_file{config.input_file};
 
-    cores.reserve(stats.size());
-
-    for (u32 i = 0; i < stats.size(); i++) {
+    for (u32 i = 0; i < num_of_cores; i++) {
         std::string input_file_path = std::format("{}_{}.data", input_file, i);
 
         if (!std::filesystem::exists(input_file_path)) {
@@ -21,7 +19,7 @@ void Simulator::run()
         }
 
         cores.emplace_back(i, input_file_path, config.cache_size, config.associativity,
-                           config.block_size, stats[i]);
+                           config.block_size, stats);
     }
 
     while (true) {
@@ -43,116 +41,7 @@ void Simulator::run()
         handle_bus_event(event);
     }
 
-    print_execution_cycle();
-    print_compute_cycle();
-    print_load_store_cycle();
-    print_idle_cycle();
-    print_cache_hit_miss_stats();
-    print_bus_traffic_stats();
-    print_bus_invalidation_update_stats();
-    print_private_shared_data_access_stats();
-}
-
-void Simulator::print_execution_cycle()
-{
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i]->get_total_cycle();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_compute_cycle()
-{
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i]->get_compute_cycle();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_load_store_cycle()
-{
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i]->get_load_store_cycle();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_idle_cycle()
-{
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i]->get_idle_cycle();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_cache_hit_miss_stats()
-{
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i]->get_cache_hit_count() << ":" << stats[i]->get_cache_miss_count();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_bus_traffic_stats()
-{
-    u64 total_bus_traffic = 0;
-
-    for (u32 i = 0; i < stats.size(); i++) {
-        total_bus_traffic += stats[i]->get_bus_data_traffic();
-    }
-
-    std::cout << total_bus_traffic << std::endl;
-}
-
-void Simulator::print_bus_invalidation_update_stats()
-{
-    u64 total_bus_invalidation_update = 0;
-
-    for (u32 i = 0; i < stats.size(); i++) {
-        total_bus_invalidation_update += stats[i]->get_bus_invalidation_count();
-        total_bus_invalidation_update += stats[i]->get_bus_update_count();
-    }
-
-    std::cout << total_bus_invalidation_update << std::endl;
-}
-
-void Simulator::print_private_shared_data_access_stats()
-{
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i]->get_private_data_access_count() << ":"
-                  << stats[i]->get_shared_data_access_count();
-    }
-
-    std::cout << std::endl;
+    stats->print_all_stats();
 }
 
 void Simulator::handle_bus_event(const Event &event)
@@ -198,7 +87,7 @@ void Simulator::handle_bus_event(const Event &event)
                 is_shared = true;
                 // invalidate other cores cache line
                 cores[i].update_cache_line_mesi_state(memory_address, MesiState::INVALID);
-                stats[i]->increase_bus_invalidation(1);
+                stats->increase_bus_invalidation(1);
             }
 
             new_mesi_state = MesiState::MODIFIED;
@@ -218,7 +107,7 @@ void Simulator::handle_bus_event(const Event &event)
         if (core.fill_cache_line(memory_address, new_mesi_state)) {
             // need to flush evicted cache into memory
             latency += CACHE_MISS_PENALTY;
-            stats[event.core_idx]->increase_bus_traffic(config.block_size);
+            stats->increase_bus_traffic(config.block_size);
         }
     }
 

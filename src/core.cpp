@@ -22,7 +22,7 @@ Event Core::step()
 
     if (operation == CoreOperation::OTHER) {
         increase_cycle(value);
-        stats->increase_compute_cycle(value);
+        stats->increase_compute_cycle(core_idx, value);
         return Event(core_idx, BusSignal::NOP, value);
     }
 
@@ -32,7 +32,7 @@ Event Core::step()
     increase_cycle(1);
 
     if (!cache_access_result.cache_hit) {
-        stats->cache_miss_activity(block_size);
+        stats->cache_miss_activity(core_idx, block_size);
         // cache miss
         // if it is cache write, send BusRdX to invalidate other cores
         // if it is cache read, send BusRd to fetch data from other cores
@@ -41,12 +41,12 @@ Event Core::step()
         return Event(core_idx, bus_signal, value);
     }
 
-    stats->cache_hit_activity();
+    stats->cache_hit_activity(core_idx);
 
     if (cache_access_result.mesi_state == MesiState::SHARED) {
-        stats->increase_shared_data_access(1);
+        stats->increase_shared_data_access(core_idx, 1);
     } else {
-        stats->increase_private_data_access(1);
+        stats->increase_private_data_access(core_idx, 1);
     }
 
     // cache hit and cache write operation
@@ -74,7 +74,7 @@ Event Core::step()
 
 void Core::stall_until(u64 cycle)
 {
-    stats->increase_idle_cycle(cycle - current_cycle);
+    stats->increase_idle_cycle(core_idx, cycle - current_cycle);
     current_cycle = cycle;
 }
 
