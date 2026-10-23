@@ -1,5 +1,4 @@
 #include "stats.hpp"
-#include "params.hpp"
 
 #include <iostream>
 #include <format>
