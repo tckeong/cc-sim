@@ -1,15 +1,16 @@
 #include "simulator.hpp"
 #include "core.hpp"
+#include "params.hpp"
 
 #include <iostream>
 #include <filesystem>
 #include <format>
-#include <thread>
 
-void Simulator::run() {
+void Simulator::run()
+{
     std::string input_file{config.input_file};
 
-    for (u32 i = 0; i < cores.size(); i++) {
+    for (u32 i = 0; i < num_of_cores; i++) {
         std::string input_file_path = std::format("{}_{}.data", input_file, i);
 
         if (!std::filesystem::exists(input_file_path)) {
@@ -17,122 +18,99 @@ void Simulator::run() {
             return;
         }
 
-        stats[i] = Stats(i);
-        cores[i] =
-            Core(i, input_file_path, config.cache_size, config.associativity, config.block_size);
+        cores.emplace_back(i, input_file_path, config.cache_size, config.associativity,
+                           config.block_size, stats);
     }
 
-    std::vector<std::thread> threads;
+    while (true) {
+        Core *core = nullptr;
 
-    for (u32 i = 0; i < cores.size(); i++) {
-        threads.emplace_back(run_core, std::ref(cores[i]), std::ref(stats[i]));
-    }
-
-    for (auto &thread : threads) {
-        thread.join();
-    }
-
-    print_execution_cycle();
-    print_compute_cycle();
-    print_load_store_cycle();
-    print_idle_cycle();
-    print_cache_hit_miss_stats();
-    print_bus_traffic_stats();
-}
-
-void Simulator::print_execution_cycle() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
+        // find the core with the smallest current cycle
+        for (auto &c : cores) {
+            if (!c.is_finished() &&
+                (core == nullptr || c.get_current_cycle() < core->get_current_cycle())) {
+                core = &c;
+            }
         }
 
-        std::cout << stats[i].get_total_cycle();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_compute_cycle() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
+        if (core == nullptr) {
+            break;
         }
 
-        std::cout << stats[i].get_compute_cycle();
+        auto event = core->step();
+        handle_bus_event(event);
     }
 
-    std::cout << std::endl;
+    stats->print_all_stats();
 }
 
-void Simulator::print_load_store_cycle() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
+void Simulator::handle_bus_event(const Event &event)
+{
+    Core     &core           = cores[event.core_idx];
+    BusSignal bus_signal     = event.bus_signal;
+    u32       memory_address = static_cast<u32>(event.address);
 
-        std::cout << stats[i].get_load_store_cycle();
+    if (bus_signal == BusSignal::NOP) {
+        return;
     }
 
-    std::cout << std::endl;
-}
+    u64 start   = std::max(core.get_current_cycle(), bus_free_time);
+    u64 latency = 0;
 
-void Simulator::print_idle_cycle() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
+    bool      is_shared      = false;
+    MesiState new_mesi_state = MesiState::INVALID;
 
-        std::cout << stats[i].get_idle_cycle();
+    switch (bus_signal) {
+        case BusSignal::BusRd:
+            for (u32 i = 0; i < cores.size(); i++) {
+                if (i == static_cast<u32>(event.core_idx) ||
+                    cores[i].get_cache_line_mesi_state(memory_address) == MesiState::INVALID) {
+                    continue;
+                }
+
+                // if other cache line has the same memory address and is not invalid
+                is_shared = true;
+                cores[i].update_cache_line_mesi_state(memory_address, MesiState::SHARED);
+            }
+
+            // if other core have same cache, mesi_state = shared, else exclusive
+            new_mesi_state = is_shared ? MesiState::SHARED : MesiState::EXCLUSIVE;
+            break;
+        case BusSignal::BusRdX:
+            for (u32 i = 0; i < cores.size(); i++) {
+                if (i == static_cast<u32>(event.core_idx) ||
+                    cores[i].get_cache_line_mesi_state(memory_address) == MesiState::INVALID) {
+                    continue;
+                }
+
+                // if other cache line has the same memory address and is not invalid
+                is_shared = true;
+                // invalidate other cores cache line
+                cores[i].update_cache_line_mesi_state(memory_address, MesiState::INVALID);
+                stats->increase_bus_invalidation(1);
+            }
+
+            new_mesi_state = MesiState::MODIFIED;
+            break;
+        default:
+            // BusFlush just write back to memory, in this simulator dont need to flush to other cores
+            break;
     }
 
-    std::cout << std::endl;
-}
+    // handle cache miss
+    if (core.get_cache_line_mesi_state(memory_address) == MesiState::INVALID) {
+        // if other cores have the same cache line, then cache to cache latency, else cache miss penalty
+        latency = is_shared ? CACHE_TO_CACHE_LATENCY(config.block_size) : CACHE_MISS_PENALTY;
 
-void Simulator::print_cache_hit_miss_stats() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
+        // fill the cache line with new mesi state
+        // if it is in modified state, flush evicted cache line to memory (writeback policy)
+        if (core.fill_cache_line(memory_address, new_mesi_state)) {
+            // need to flush evicted cache into memory
+            latency += CACHE_MISS_PENALTY;
+            stats->increase_bus_traffic(config.block_size);
         }
-
-        std::cout << stats[i].get_cache_hit_count() << ":" << stats[i].get_cache_miss_count();
     }
 
-    std::cout << std::endl;
-}
-
-void Simulator::print_bus_traffic_stats() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i].get_bus_data_traffic();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_bus_invalidation_update_stats() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i].get_bus_invalidation_count() + stats[i].get_bus_update_count();
-    }
-
-    std::cout << std::endl;
-}
-
-void Simulator::print_private_shared_data_access_stats() {
-    for (u32 i = 0; i < stats.size(); i++) {
-        if (i > 0) {
-            std::cout << " ";
-        }
-
-        std::cout << stats[i].get_private_data_access_count() << ":"
-                  << stats[i].get_shared_data_access_count();
-    }
-
-    std::cout << std::endl;
+    bus_free_time = start + latency;
+    core.stall_until(bus_free_time);
 }

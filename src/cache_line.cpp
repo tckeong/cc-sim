@@ -1,64 +1,79 @@
 #include "cache_line.hpp"
+#include "types.hpp"
 
-CacheAccessResult CacheLine::cache_read(u32 address, u64 current_cycle) {
+CacheAccessResult CacheLine::lookup(u32 address, u64 current_cycle)
+{
     u32 tag       = parse_tag(address);
-    i32 hit_index = check_cache_hit(tag, current_cycle);
+    i32 hit_index = get_hit_index(tag);
 
-    if (hit_index >= 0) {
-        return CacheAccessResult{.cache_hit = true, .bus_update = false};
+    if (hit_index < 0) {
+        return CacheAccessResult(false, MesiState::INVALID);
     }
 
-    auto [lru_index, bus_update] = resolve_cache_miss(tag, current_cycle);
-    return CacheAccessResult{.cache_hit = false, .bus_update = bus_update};
+    last_visit[hit_index] = current_cycle;
+    return CacheAccessResult(true, mesi_states[hit_index].get_state());
 }
 
-CacheAccessResult CacheLine::cache_write(u32 address, u64 current_cycle) {
-    u32 tag       = parse_tag(address);
-    i32 hit_index = check_cache_hit(tag, current_cycle);
+bool CacheLine::fill(u32 address, u64 current_cycle, MesiState new_mesi_state)
+{
+    u32 lru_index = 0;
 
-    if (hit_index >= 0) {
-        dirty_bits[hit_index] = true;
-        return CacheAccessResult{.cache_hit = true, .bus_update = false};
+    for (u32 i = 0; i < associativity; i++) {
+        if (!mesi_states[i].is_valid()) {
+            lru_index = i;
+            break;
+        }
+
+        if (last_visit[i] < last_visit[lru_index]) {
+            lru_index = i;
+        }
     }
 
-    auto [lru_index, bus_update] = resolve_cache_miss(tag, current_cycle);
-    dirty_bits[lru_index]        = true;
-    return CacheAccessResult{.cache_hit = false, .bus_update = bus_update};
+    bool need_writeback = mesi_states[lru_index].get_state() == MesiState::MODIFIED;
+
+    tags[lru_index]       = parse_tag(address);
+    last_visit[lru_index] = current_cycle;
+    mesi_states[lru_index].set_state(new_mesi_state);
+
+    return need_writeback;
 }
 
-u32 CacheLine::parse_tag(u32 address) {
+MesiState CacheLine::get_mesi_state(u32 address)
+{
+    u32 tag       = parse_tag(address);
+    i32 hit_index = get_hit_index(tag);
+
+    if (hit_index < 0) {
+        return MesiState::INVALID;
+    }
+
+    return mesi_states[hit_index].get_state();
+}
+
+void CacheLine::update_mesi_state(u32 memory, MesiState new_mesi_state)
+{
+    u32 tag       = parse_tag(memory);
+    i32 hit_index = get_hit_index(tag);
+
+    if (hit_index >= 0) {
+        mesi_states[hit_index].set_state(new_mesi_state);
+        return;
+    }
+}
+
+u32 CacheLine::parse_tag(u32 address)
+{
     u32 tag = address >> (cache_offset + block_offset);
     return tag;
 }
 
-i32 CacheLine::check_cache_hit(u32 tag, u64 current_cycle) {
+u32 CacheLine::get_hit_index(u32 tag)
+{
     for (u32 i = 0; i < associativity; i++) {
-        if (valid_bits[i] && tags[i] == tag) {
-            last_visit[i] = current_cycle;
+        if (mesi_states[i].is_valid() && tags[i] == tag) {
             return i;
         }
     }
 
     return -1;
-}
-
-std::pair<u32, bool> CacheLine::resolve_cache_miss(u32 tag, u64 current_cycle) {
-    u32 lru_index = 0;
-    u64 lru_cycle = last_visit[0];
-
-    for (u32 i = 1; i < associativity; i++) {
-        if (last_visit[i] < lru_cycle || !valid_bits[i]) {
-            lru_index = i;
-            lru_cycle = last_visit[i];
-        }
-    }
-
-    bool bus_update = dirty_bits[lru_index];
-
-    valid_bits[lru_index] = true;
-    dirty_bits[lru_index] = false;
-    tags[lru_index]       = tag;
-    last_visit[lru_index] = current_cycle;
-
-    return {lru_index, bus_update};
 }
